@@ -21,6 +21,11 @@ public class TaskController {
         return taskService.getAllTasks();
     }
 
+    @GetMapping("/priority/{priority}")
+    public List<Task> getTasksByPriority(@PathVariable String priority) {
+        return taskService.getTasksByPriority(priority);
+    }
+
     @GetMapping("/{id}")
     public Task getTask(@PathVariable Long id) {
         return taskService.getTaskById(id);

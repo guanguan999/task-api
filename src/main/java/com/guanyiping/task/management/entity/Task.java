@@ -23,6 +23,8 @@ public class Task {
 
     private String description;
 
+    private String priority = "Low";
+
     private boolean completed = false;
 
     @Column(updatable = false)

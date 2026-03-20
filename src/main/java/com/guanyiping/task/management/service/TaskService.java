@@ -17,6 +17,10 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
+    public List<Task> getTasksByPriority(String priority) {
+        return taskRepository.findByPriority(priority);
+    }
+
     public Task getTaskById(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Task not found: " + id));
@@ -28,8 +32,15 @@ public class TaskService {
 
     public Task updateTask(Long id, Task updated) {
         Task task = getTaskById(id);
-        task.setTitle(updated.getTitle());
-        task.setDescription(updated.getDescription());
+        if (updated.getTitle() != null) {
+            task.setTitle(updated.getTitle());
+        }
+        if (updated.getPriority() != null) {
+            task.setPriority(updated.getPriority());
+        }
+        if (updated.getDescription() != null) {
+            task.setDescription(updated.getDescription());
+        }
         task.setCompleted(updated.isCompleted());
         return taskRepository.save(task);
     }
