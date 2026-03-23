@@ -3,6 +3,8 @@ package com.guanyiping.task.management.service;
 import com.guanyiping.task.management.dto.AuthRequest;
 import com.guanyiping.task.management.dto.AuthResponse;
 import com.guanyiping.task.management.entity.User;
+import com.guanyiping.task.management.exception.DuplicateResourceException;
+import com.guanyiping.task.management.exception.ResourceNotFoundException;
 import com.guanyiping.task.management.repository.UserRepository;
 import com.guanyiping.task.management.security.CustomUserDetails;
 import com.guanyiping.task.management.security.JwtUtil;
@@ -22,6 +24,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(AuthRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("Email already registered: " + request.getEmail());
+        }
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
@@ -35,7 +40,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return new AuthResponse(jwtUtil.generateToken(new CustomUserDetails(user)));
     }
 }

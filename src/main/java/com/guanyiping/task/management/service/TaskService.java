@@ -1,6 +1,9 @@
 package com.guanyiping.task.management.service;
 
+import com.guanyiping.task.management.dto.TaskRequest;
+import com.guanyiping.task.management.dto.TaskResponse;
 import com.guanyiping.task.management.entity.Task;
+import com.guanyiping.task.management.exception.ResourceNotFoundException;
 import com.guanyiping.task.management.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,25 +16,30 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll().stream().map(this::toResponse).toList();
     }
 
-    public List<Task> getTasksByPriority(String priority) {
-        return taskRepository.findByPriority(priority);
+    public List<TaskResponse> getTasksByPriority(String priority) {
+        return taskRepository.findByPriority(priority).stream().map(this::toResponse).toList();
     }
 
-    public Task getTaskById(Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found: " + id));
+    public TaskResponse getTaskById(Long id) {
+        return toResponse(taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + id)));
     }
 
-    public Task createTask(Task task) {
-        return taskRepository.save(task);
+    public TaskResponse createTask(TaskRequest request) {
+        Task task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setPriority(request.getPriority());
+        return toResponse(taskRepository.save(task));
     }
 
-    public Task updateTask(Long id, Task updated) {
-        Task task = getTaskById(id);
+    public TaskResponse updateTask(Long id, TaskRequest updated) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + id));
         if (updated.getTitle() != null) {
             task.setTitle(updated.getTitle());
         }
@@ -41,14 +49,18 @@ public class TaskService {
         if (updated.getDescription() != null) {
             task.setDescription(updated.getDescription());
         }
-        task.setCompleted(updated.isCompleted());
-        return taskRepository.save(task);
+        return toResponse(taskRepository.save(task));
     }
 
-    public Task completeTask(Long id) {
-        Task task = getTaskById(id);
+    public TaskResponse completeTask(Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + id));
         task.setCompleted(true);
-        return taskRepository.save(task);
+        return toResponse(taskRepository.save(task));
+    }
+
+    private TaskResponse toResponse(Task task) {
+        return new TaskResponse(task.getId(), task.getTitle(), task.getDescription(), task.getPriority(), task.isCompleted());
     }
 
     public void deleteTask(Long id) {

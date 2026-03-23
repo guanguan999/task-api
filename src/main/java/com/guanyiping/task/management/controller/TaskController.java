@@ -1,6 +1,7 @@
 package com.guanyiping.task.management.controller;
 
-import com.guanyiping.task.management.entity.Task;
+import com.guanyiping.task.management.dto.TaskRequest;
+import com.guanyiping.task.management.dto.TaskResponse;
 import com.guanyiping.task.management.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,33 +18,34 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public List<Task> getAllTasks() {
-        return taskService.getAllTasks();
+    public ResponseEntity<List<TaskResponse>> getAllTasks() {
+
+        return ResponseEntity.ok(taskService.getAllTasks());
     }
 
     @GetMapping("/priority/{priority}")
-    public List<Task> getTasksByPriority(@PathVariable String priority) {
-        return taskService.getTasksByPriority(priority);
+    public ResponseEntity<List<TaskResponse>> getTasksByPriority(@PathVariable String priority) {
+        return ResponseEntity.ok(taskService.getTasksByPriority(priority));
     }
 
     @GetMapping("/{id}")
-    public Task getTask(@PathVariable Long id) {
-        return taskService.getTaskById(id);
+    public ResponseEntity<TaskResponse> getTask(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(task));
+    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskService.createTask(request));
     }
 
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task task) {
-        return taskService.updateTask(id, task);
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id, @RequestBody TaskRequest request) {
+        return ResponseEntity.ok(taskService.updateTask(id, request));
     }
 
     @PatchMapping("/{id}/complete")
-    public Task completeTask(@PathVariable Long id) {
-        return taskService.completeTask(id);
+    public ResponseEntity<TaskResponse> completeTask(@PathVariable Long id) {
+        return ResponseEntity.ok(taskService.completeTask(id));
     }
 
     @DeleteMapping("/{id}")
