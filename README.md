@@ -22,23 +22,28 @@ src/main/java/com/guanyiping/task/management/
 │   └── SecurityConfig.java           # Security & JWT filter chain
 ├── controller/
 │   ├── AuthController.java           # Register / Login
-│   └── TaskController.java           # Task CRUD
+│   ├── TaskController.java           # Task CRUD
+│   └── CategoryController.java       # Category CRUD
 ├── dto/
 │   ├── AuthRequest.java
 │   ├── AuthResponse.java
 │   ├── TaskRequest.java
 │   ├── TaskResponse.java
+│   ├── CategoryRequest.java
+│   ├── CategoryResponse.java
 │   └── ErrorResponse.java
 ├── entity/
 │   ├── User.java
-│   └── Task.java
+│   ├── Task.java                     # ManyToOne → User, Category
+│   └── Category.java
 ├── exception/
 │   ├── GlobalExceptionHandler.java
 │   ├── ResourceNotFoundException.java
 │   └── DuplicateResourceException.java
 ├── repository/
 │   ├── UserRepository.java
-│   └── TaskRepository.java
+│   ├── TaskRepository.java           # @EntityGraph to prevent N+1
+│   └── CategoryRepository.java
 ├── security/
 │   ├── JwtUtil.java
 │   ├── JwtFilter.java
@@ -46,7 +51,8 @@ src/main/java/com/guanyiping/task/management/
 │   └── UserDetailsServiceImpl.java
 └── service/
     ├── AuthService.java
-    └── TaskService.java
+    ├── TaskService.java
+    └── CategoryService.java
 ```
 
 ## Prerequisites
@@ -244,6 +250,78 @@ Response `204 No Content` / `404 Not Found`
 
 ---
 
+### Categories
+
+All category endpoints require the `Authorization` header:
+
+```
+Authorization: Bearer <JWT token>
+```
+
+#### Get All Categories
+
+```
+GET /categories
+```
+
+Response `200 OK`:
+```json
+[
+  {
+    "id": 1,
+    "name": "Work",
+    "description": "Work-related tasks"
+  }
+]
+```
+
+#### Get Category by ID
+
+```
+GET /categories/{id}
+```
+
+Response `200 OK` / `404 Not Found`
+
+#### Create Category
+
+```
+POST /categories
+```
+
+Request body:
+```json
+{
+  "name": "Work",
+  "description": "Work-related tasks"
+}
+```
+
+Response `201 Created`
+
+Validation rules:
+- `name`: required, unique
+
+#### Update Category
+
+```
+PUT /categories/{id}
+```
+
+Partial update supported — only non-null fields are applied.
+
+Response `200 OK` / `404 Not Found`
+
+#### Delete Category
+
+```
+DELETE /categories/{id}
+```
+
+Response `204 No Content` / `404 Not Found`
+
+---
+
 ## Error Responses
 
 All errors follow this format:
@@ -289,6 +367,7 @@ Test coverage includes unit and integration tests across all layers:
 | `AuthControllerTest` | Auth endpoints, error scenarios |
 | `JwtUtilTest` | Token generation, validation, expiration, tamper detection |
 | `GlobalExceptionHandlerTest` | Exception-to-HTTP status mapping |
+| `TaskRepositoryTest` | N+1 prevention via `@EntityGraph` (integration test against real DB) |
 
 ```bash
 ./gradlew test
