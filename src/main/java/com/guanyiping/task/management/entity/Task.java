@@ -27,6 +27,14 @@ public class Task {
 
     private boolean completed = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
